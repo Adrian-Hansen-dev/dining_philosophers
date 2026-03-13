@@ -25,11 +25,18 @@ public class Philosopher implements Runnable {
 
     @Override
     public void run() {
-        // only checks running at the top — if deadlocked mid-loop, this is never reached
         while (running) {
             think();
-            leftFork.take(index);   // NAIVE: always takes left first — can cause deadlock
-            rightFork.take(index);  // blocks here if right fork is held by neighbour
+            // deadlock prevention: break circular wait by reversing fork order for even philosophers
+            // odd  philosophers: left fork first, then right
+            // even philosophers: right fork first, then left
+            if (index % 2 != 0) {
+                leftFork.take(index);
+                rightFork.take(index);
+            } else {
+                rightFork.take(index);
+                leftFork.take(index);
+            }
             eat();
             leftFork.putBack(index);
             rightFork.putBack(index);
