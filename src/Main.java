@@ -26,20 +26,45 @@ public class Main {
 
         System.out.println("\nStarting dinner with " + n + " philosophers");
         System.out.println("Max thinking time: " + thinkingTime + " ms");
-        System.out.println("Max eating time: " + eatingTime + " ms");
+        System.out.println("Max eating time:   " + eatingTime + " ms\n");
 
-        // TODO: Create forks
-        // TODO: Create and start philosopher threads
-        // TODO: Wait for keyboard input to shutdown
+        // Create forks — f0 is between p(n-1) and p0, fi is between p(i-1) and pi
+        Fork[] forks = new Fork[n];
+        for (int i = 0; i < n; i++) {
+            forks[i] = new Fork(i);
+        }
 
-        System.out.println("\nPress ENTER to stop the dinner...");
-        scanner.nextLine(); // consume leftover newline
+        // Create philosophers — pi takes fork[i] (left) and fork[(i+1) % n] (right)
+        Philosopher[] philosophers = new Philosopher[n];
+        Thread[] threads = new Thread[n];
+        for (int i = 0; i < n; i++) {
+            Fork left  = forks[i];
+            Fork right = forks[(i + 1) % n];
+            philosophers[i] = new Philosopher(i, left, right, thinkingTime, eatingTime);
+            threads[i] = new Thread(philosophers[i], "Philosopher-" + i);
+        }
+
+        for (Thread t : threads) {
+            t.start();
+        }
+
+        System.out.println("Press ENTER to stop the dinner...");
+        scanner.nextLine(); // consume leftover newline after nextInt
         scanner.nextLine(); // wait for actual ENTER
 
         System.out.println("Shutting down...");
-        // TODO: Signal philosophers to stop and join threads
+        for (Philosopher p : philosophers) {
+            p.stop();
+        }
+        for (Thread t : threads) {
+            try {
+                t.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
 
         scanner.close();
-        System.out.println("Done.");
+        System.out.println("All philosophers have left. Dinner is over.");
     }
 }
