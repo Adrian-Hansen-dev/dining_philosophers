@@ -9,6 +9,8 @@ public class Philosopher implements Runnable {
     // volatile ensures the updated value is visible across threads immediately
     private volatile boolean running = true;
     private final Random random = new Random();
+    // only written by this philosopher's own thread — no synchronisation needed
+    private long totalEatingTime = 0;
 
     public Philosopher(int index, Fork leftFork, Fork rightFork, int maxThinkingTime, int maxEatingTime) {
         this.index = index;
@@ -61,9 +63,14 @@ public class Philosopher implements Runnable {
             int t = random.nextInt(maxEatingTime + 1);
             System.out.println("Philosopher " + index + " is eating for " + t + " ms");
             Thread.sleep(t);
+            totalEatingTime += t;
             System.out.println("Philosopher " + index + " is done eating");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    public long getTotalEatingTime() {
+        return totalEatingTime;
     }
 }

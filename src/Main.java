@@ -48,6 +48,7 @@ public class Main {
             t.start();
         }
 
+        long startTime = System.currentTimeMillis();
         System.out.println("Press ENTER to stop the dinner...");
         scanner.nextLine(); // consume leftover newline after nextInt
         scanner.nextLine(); // wait for actual ENTER
@@ -64,7 +65,17 @@ public class Main {
             }
         }
 
+        long wallClockTime = System.currentTimeMillis() - startTime;
+        long totalEatingTime = 0;
+        for (Philosopher p : philosophers) {
+            totalEatingTime += p.getTotalEatingTime();
+        }
+
         scanner.close();
         System.out.println("All philosophers have left. Dinner is over.");
+        System.out.println("\n--- Dinner Statistics ---");
+        System.out.println("Wall-clock time:      " + wallClockTime + " ms");
+        System.out.println("Total eating time:    " + totalEatingTime + " ms");
+        System.out.println("Parallelism factor:   " + String.format("%.2f", (double) totalEatingTime / wallClockTime) + "x");
     }
 }
