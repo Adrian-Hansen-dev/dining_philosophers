@@ -9,7 +9,7 @@ public class Philosopher implements Runnable {
     // volatile ensures the updated value is visible across threads immediately
     private volatile boolean running = true;
     private final Random random = new Random();
-    // only written by this philosopher's own thread — no synchronisation needed
+    // only written by this philosopher's own thread,  no synchronisation needed
     private long totalEatingTime = 0;
 
     public Philosopher(int index, Fork leftFork, Fork rightFork, int maxThinkingTime, int maxEatingTime) {
@@ -25,25 +25,45 @@ public class Philosopher implements Runnable {
         running = false;
     }
 
+ // NAIVE implementation that can lead to deadlock if all philosophers pick up their left fork and wait for the right one
+//    @Override
+//    public void run() {
+//        while (running) {
+//            think();
+//            leftFork.take(index);
+//            rightFork.take(index);
+//            eat();
+//            leftFork.putBack(index);
+//            rightFork.putBack(index);
+//        }
+//        System.out.println("Philosopher " + index + " has left the table.");
+//    }
+
     @Override
     public void run() {
-        while (running) {
-            think();
-            // deadlock prevention: break circular wait by reversing fork order for even philosophers
-            // odd  philosophers: left fork first, then right
-            // even philosophers: right fork first, then left
-            if (index % 2 != 0) {
-                leftFork.take(index);
-                rightFork.take(index);
-            } else {
-                rightFork.take(index);
-                leftFork.take(index);
+        try {
+            while (running) {
+                think();
+                Fork first = (index % 2 != 0) ? leftFork : rightFork;
+                Fork second = (index % 2 != 0) ? rightFork : leftFork;
+
+                first.take(index);
+                try {
+                    second.take(index);
+                    try {
+                        eat();
+                    } finally {
+                        second.putBack(index);
+                    }
+                } finally {
+                    first.putBack(index);
+                }
             }
-            eat();
-            leftFork.putBack(index);
-            rightFork.putBack(index);
+        } catch (Exception e) {
+            System.out.println("Philosopher " + index + " encountered an error: " + e.getMessage());
+        } finally {
+            System.out.println("Philosopher " + index + " cleanup and leaving table.");
         }
-        System.out.println("Philosopher " + index + " has left the table.");
     }
 
     private void think() {
