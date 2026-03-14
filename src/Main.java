@@ -57,10 +57,7 @@ public class Main {
         for (Philosopher p : philosophers) {
             p.stop();
         }
-        // wake up any philosophers that might be sleeping (thinking or eating) so they can check the running flag and exit
-        for (Thread t : threads) {
-            t.interrupt();
-        }
+
         // wait for all philosopher threads to finish
         for (Thread t : threads) {
             try {
