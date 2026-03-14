@@ -28,13 +28,13 @@ public class Main {
         System.out.println("Max thinking time: " + thinkingTime + " ms");
         System.out.println("Max eating time:   " + eatingTime + " ms\n");
 
-        // Create forks — f0 is between p(n-1) and p0, fi is between p(i-1) and pi
+        // Create forks: f0 is between p(n-1) and p0, fi is between p(i-1) and pi
         Fork[] forks = new Fork[n];
         for (int i = 0; i < n; i++) {
             forks[i] = new Fork(i);
         }
 
-        // Create philosophers — pi takes fork[i] (left) and fork[(i+1) % n] (right)
+        // Create philosophers: pi takes fork[i] (left) and fork[(i+1) % n] (right)
         Philosopher[] philosophers = new Philosopher[n];
         Thread[] threads = new Thread[n];
         for (int i = 0; i < n; i++) {
